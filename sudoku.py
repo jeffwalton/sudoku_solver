@@ -186,6 +186,18 @@ class Sudoku():
         return self
 
 
+    def all_cells_filled(self):
+        """
+        check if all cells are filled
+        Returns: True if no empty cells exist, False if empty cells remain
+        """
+        for r in range(self._rows):
+            for c in range(self._columns):
+                if self.grid[r][c] == EMPTY:
+                    return False
+        return True
+
+
     def print_num_options(self):
         """
         prints a grid conaining number of options for each cell
@@ -235,28 +247,30 @@ class Sudoku():
 
 
 def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
-    solution = None
     sud1 = deepcopy(sudoku)
     sud1._options = sud1.get_options()
     sud1 = sud1.fill_easy()
     sud1._options = sud1.get_options()
+    print("input:\n", sud1)
     
-    if sud1.num_options_all_zero() & sud1.is_valid():
+    if sud1.is_valid() & sud1.all_cells_filled():
         return sud1
-    else:
-        for n in range(2, VALUE_RANGE):
-            opt = sud1.get_first_option(n)
-            if opt is None:
-                continue
-            opt_list: List = sud1._options[opt[0]][opt[1]]
-            for v in opt_list:
-                sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
-                if sud1.is_valid():
-                    print("call solver")
-                    solution = sudoku_solver(sud1)
-                    if solution is not None:
-                        return solution
-        return None
+
+    for n in range(2, VALUE_RANGE):
+        opt = sud1.get_first_option(n)
+        if opt is None:
+            continue
+        opt_list: List = sud1._options[opt[0]][opt[1]]
+        for v in opt_list:
+            print("try", (opt[0],opt[1],v))
+            sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
+            if sud1.is_valid():
+                print("call solver")
+                solution = sudoku_solver(sud1)
+                print("soln", solution)
+                if solution is not None:
+                    return solution
+    return None
 
 
 if __name__ == "__main__":
