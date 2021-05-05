@@ -78,7 +78,7 @@ class Sudoku():
         elif not (all([len(r)==GRID_SIZE for r in initial_values])):
             print(f"initial_values: not all rows contain {GRID_SIZE} columns.")
         else:
-            self.grid: Grid = initial_values
+            self.grid: Grid = initial_values.copy()
         self._options: Options = self.get_options()
 
 
@@ -101,6 +101,33 @@ class Sudoku():
             output += "],\n"
         output += "]\n"
         return output
+
+
+    def is_valid(self) -> bool:
+        """
+        checks if sudoku constraints are satisfied
+        """
+        for r in range(self._rows):
+            for c in range(self._columns):
+                if self.grid[r][c] != EMPTY:
+                    # check row
+                    for j in range(self._columns):
+                        if (c != j) & (self.grid[r][c] == self.grid[r][j]):
+                            return False
+                    # check column
+                    for i in range(self._rows):
+                        if (r != i) & (self.grid[r][c] == self.grid[i][c]):
+                            return False
+                    # check sector
+                    sec_r = r // SECTOR_SIZE
+                    sec_c = c // SECTOR_SIZE
+                    for i in range(SECTOR_SIZE):
+                        for j in range(SECTOR_SIZE):
+                            si = SECTOR_SIZE*sec_r + i
+                            sj = SECTOR_SIZE*sec_c + j
+                            if (r != si) & (c != sj) & (self.grid[r][c] == self.grid[si][sj]):
+                                return False
+        return True
 
 
     def _init_domain(self) -> Options:
@@ -155,7 +182,8 @@ class Sudoku():
             self.grid[r][c] = v
             self._options: Options = self.get_options()
         else:
-            print(f"in set_cell() rvc is {rcv}.")
+            print(f"in set_cell() rcv is {rcv}.")
+        return self
 
 
     def print_num_options(self):
@@ -197,31 +225,35 @@ class Sudoku():
         """
         d = True
         step_count = 0
-        while (d):
-            d = self.set_cell(self.get_first_option(1))
+        opt = self.get_first_option(1)
+        while (opt is not None):
+            self.set_cell(opt)
             step_count += 1
-            print(f"Step: {step_count}\n{self}")
+            #print(f"Step: {step_count}\n{self}")
+            opt = self.get_first_option(1)
         return self
 
 
-def sudoku_solver(s: Sudoku) -> Optional[Sudoku]:
-    """
-    solves a sudoku using a backtracking process
-    """
-    sud1 = deepcopy(s)
+def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
+    solution = None
+    sud1 = deepcopy(sudoku)
     sud1._options = sud1.get_options()
     sud1 = sud1.fill_easy()
     sud1._options = sud1.get_options()
     
-    if sud1.num_options_all_zero():
+    if sud1.num_options_all_zero() & sud1.is_valid():
         return sud1
     else:
         for n in range(2, VALUE_RANGE):
-            sud1 = sud1.set_cell(sud1.get_first_option(n)).fill_easy()
-            solution = sudoku_solver(sud1)
+            opt = sud1.get_first_option(n)
+            opt_list: List = sud1._options[opt[0]][opt[1]]
+            for v in opt_list:
+                sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
+                print("call solver")
+                solution = sudoku_solver(sud1)
             if solution is not None:
                 return solution
-    return None
+        return None
 
 
 if __name__ == "__main__":
