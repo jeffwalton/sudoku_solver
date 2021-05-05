@@ -246,6 +246,8 @@ def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
     else:
         for n in range(2, VALUE_RANGE):
             opt = sud1.get_first_option(n)
+            if opt is None:
+                continue
             opt_list: List = sud1._options[opt[0]][opt[1]]
             for v in opt_list:
                 sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
