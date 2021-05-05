@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum
 from typing import List, Tuple, NamedTuple, Callable, Optional
 
@@ -145,17 +146,16 @@ class Sudoku():
         return opts
 
 
-    def set_cell(self, rcv: Optional[Tuple[int, int, int]] ) -> bool:
+    def set_cell(self, rcv: Optional[Tuple[int, int, int]] ):
         """
-        set a sudoku puzzle grid cell (r, c) to value (v); returns new grid?
+        set a sudoku puzzle grid cell (r, c) to value (v)
         """
         if rcv:
             r, c, v = rcv
             self.grid[r][c] = v
             self._options: Options = self.get_options()
-            return True
         else:
-            return False
+            print(f"in set_cell() rvc is {rcv}.")
 
 
     def print_num_options(self):
@@ -204,15 +204,23 @@ class Sudoku():
         return self
 
 
-def sudoku_solver(grid: Grid, change: Tuple[int, int, int]) -> Sudoku:
-    sud1 = Sudoku(grid).fill_easy()
+def sudoku_solver(s: Sudoku) -> Optional[Sudoku]:
+    sud1 = deepcopy(s)
+    sud1._options = sud1.get_options()
+    sud1 = sud1.fill_easy()
+    sud1._options = sud1.get_options()
+    
     if sud1.num_options_all_zero():
         return sud1
     else:
-        for n in sorted_list_of_number_of_options:
-            while (d):
-                d = sud1.set_cell(sud1.get_first_option(n)).fill_easy()
-                
- 
-            solution = sudoku_solver(sud1.grid.copy(), sud1.get_first_option(n))
-        return solution
+        for n in range(2, VALUE_RANGE):
+            sud1 = sud1.set_cell(sud1.get_first_option(n)).fill_easy()
+            solution = sudoku_solver(sud1)
+            if solution is not None:
+                return solution
+    return None
+
+
+if __name__ == "__main__":
+    s1 = Sudoku(puz1)
+    print(sudoku_solver(s1))
