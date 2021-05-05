@@ -251,10 +251,11 @@ def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
             opt_list: List = sud1._options[opt[0]][opt[1]]
             for v in opt_list:
                 sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
-                print("call solver")
-                solution = sudoku_solver(sud1)
-            if solution is not None:
-                return solution
+                if sud1.is_valid():
+                    print("call solver")
+                    solution = sudoku_solver(sud1)
+                    if solution is not None:
+                        return solution
         return None
 
 
