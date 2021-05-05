@@ -205,6 +205,9 @@ class Sudoku():
 
 
 def sudoku_solver(s: Sudoku) -> Optional[Sudoku]:
+    """
+    solves a sudoku using a backtracking process
+    """
     sud1 = deepcopy(s)
     sud1._options = sud1.get_options()
     sud1 = sud1.fill_easy()
