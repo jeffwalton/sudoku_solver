@@ -264,7 +264,7 @@ def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
         for v in opt_list:
             print("try", (opt[0],opt[1],v))
             sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
-            if sud1.is_valid():
+            if sud1.is_valid() :
                 print("call solver")
                 solution = sudoku_solver(sud1)
                 print("soln", solution)
