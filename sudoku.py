@@ -107,9 +107,14 @@ class Sudoku():
         """
         checks if sudoku constraints are satisfied
         """
+        self._options: Options = self.get_options()
+        
         for r in range(self._rows):
             for c in range(self._columns):
-                if self.grid[r][c] != EMPTY:
+                if self.grid[r][c] == EMPTY:
+                    if self._options[r][c]:
+                        return False
+                else:
                     # check row
                     for j in range(self._columns):
                         if (c != j) & (self.grid[r][c] == self.grid[r][j]):
@@ -252,6 +257,7 @@ def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
     sud1 = sud1.fill_easy()
     sud1._options = sud1.get_options()
     print("input:\n", sud1)
+    print("options:\n", sud1._options)
     
     if sud1.is_valid() & sud1.all_cells_filled():
         return sud1
@@ -261,17 +267,22 @@ def sudoku_solver(sudoku: Sudoku) -> Optional[Sudoku]:
         if opt is None:
             continue
         opt_list: List = sud1._options[opt[0]][opt[1]]
+        print(f"num opts: {n}, first_opt_list: {opt_list}, first_option: {opt}")
+        
         for v in opt_list:
             print("try", (opt[0],opt[1],v))
             sud1 = sud1.set_cell((opt[0],opt[1],v)).fill_easy()
-            if sud1.is_valid() :
-                print("call solver")
-                solution = sudoku_solver(sud1)
-                print("soln", solution)
-                if solution is not None:
-                    return solution
+            print("sud1\n", sud1)
+            print("sud1._options\n",sud1._options)
+            if (sud1 is not None):
+                if sud1.is_valid():
+                    print("call solver\n")
+                    solution = sudoku_solver(sud1)
+                    print("soln", solution)
+                    if (solution is not None):
+                        if solution.is_valid() & solution.all_cells_filled():
+                            return solution
     return None
-
 
 if __name__ == "__main__":
     s1 = Sudoku(puz1)
